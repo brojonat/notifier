@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/brojonat/notifier/notifier"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -60,8 +61,21 @@ func main() {
 	go func() {
 		<-sub.EstablishedC()
 		for {
-			fmt.Printf("Got notification: %s\n", <-sub.NotificationC())
+			select {
+			case <-ctx.Done():
+				sub.Unlisten(ctx)
+				fmt.Println("done listening for notifications")
+				return
+			case p := <-sub.NotificationC():
+				fmt.Printf("Got notification: %s\n", p)
+			}
 		}
+	}()
+
+	// unsubscribe after some time
+	go func() {
+		time.Sleep(20 * time.Second)
+		sub.Unlisten(ctx)
 	}()
 
 	select {}
