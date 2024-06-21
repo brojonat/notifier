@@ -268,11 +268,6 @@ func (n *notifier) unlisten(ctx context.Context, sub *subscription) error {
 	return nil
 }
 
-// note: caller must already have lock on n.mu
-func (n *notifier) removeSubscription(ctx context.Context, sub *subscription) {
-
-}
-
 func (n *notifier) Run(ctx context.Context) error {
 	for {
 		err := n.waitOnce(ctx)
